@@ -32,7 +32,7 @@ class TwoLayerNet(object):
     ):
         """
         Initialize a new network.
-
+      
         Inputs:
         - input_dim: An integer giving the size of the input
         - hidden_dim: An integer giving the size of the hidden layer
@@ -43,7 +43,7 @@ class TwoLayerNet(object):
         """
         self.params = {}
         self.reg = reg
-
+        # print(input_dim)
         ############################################################################
         # TODO: Initialize the weights and biases of the two-layer net. Weights    #
         # should be initialized from a Gaussian centered at 0.0 with               #

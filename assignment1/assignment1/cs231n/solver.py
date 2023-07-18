@@ -159,7 +159,7 @@ class Solver(object):
         self.loss_history = []
         self.train_acc_history = []
         self.val_acc_history = []
-
+        self.final_train_acc=0
         # Make a deep copy of the optim_config for each parameter
         self.optim_configs = {}
         for p in self.model.params:
@@ -302,6 +302,7 @@ class Solver(object):
                 if val_acc > self.best_val_acc:
                     self.best_val_acc = val_acc
                     self.best_params = {}
+                    self.final_train_acc=train_acc
                     for k, v in self.model.params.items():
                         self.best_params[k] = v.copy()
 
