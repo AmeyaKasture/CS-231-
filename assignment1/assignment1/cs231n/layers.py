@@ -27,7 +27,10 @@ def affine_forward(x, w, b):
     # will need to reshape the input into rows.                               #
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
+    number=x.shape[0]
+    X=x.reshape(number,-1)
+    out=X.dot(w)+b
+  
     pass
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
@@ -60,7 +63,13 @@ def affine_backward(dout, cache):
     # TODO: Implement the affine backward pass.                               #
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
+    db=np.sum(dout,axis=0)
+    og=x.shape
+    number=x.shape[0]
+    X=x.reshape(number,-1)
+    dw=(X.T).dot(dout)
+    dx=dout.dot(w.T)
+    dx=dx.reshape(og)
     pass
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
@@ -86,7 +95,7 @@ def relu_forward(x):
     # TODO: Implement the ReLU forward pass.                                  #
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
+    out=np.maximum(x,0)
     pass
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
@@ -113,7 +122,10 @@ def relu_backward(dout, cache):
     # TODO: Implement the ReLU backward pass.                                 #
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
+    x[x>0]=1
+    x[x<=0]=0
+    dx=dout
+    dx[x==0]=0
     pass
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
@@ -752,7 +764,7 @@ def spatial_groupnorm_backward(dout, cache):
     return dx, dgamma, dbeta
 
 
-def svm_loss(x, y):
+def svm_loss(X, y):
     """
     Computes the loss and gradient using for multiclass SVM classification.
 
@@ -766,13 +778,34 @@ def svm_loss(x, y):
     - loss: Scalar giving the loss
     - dx: Gradient of the loss with respect to x
     """
-    loss, dx = None, None
-
+    # print(1)
+    loss= 0.0
     ###########################################################################
     # TODO: Copy over your solution from A1.
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+     # initialize the gradient as zero
+    num_train = X.shape[0]
+    dx=np.zeros(X.shape)
+    #############################################################################
+    # TODO:                                                                  #
+    # Implement a vectorized version of the structured SVM loss, storing the    #
+    # result in loss.                                                           #
+    #############################################################################
+    # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+    score=X
+    corrected_score=score[np.arange(len(y)),y].reshape(-1,1)
+    margin=np.maximum(score-corrected_score+1,0)
+    margin[np.arange(len(y)),y]=0
+    loss=np.sum(margin)
+    loss /= num_train
+    scale=margin
 
+    scale[margin>0]=1
+    score_list=-np.sum(scale,axis=1)
+    dx[margin>0]=1
+    dx[np.arange(len(y)),y]=score_list
+    dx /= num_train
     pass
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
@@ -785,7 +818,6 @@ def svm_loss(x, y):
 def softmax_loss(x, y):
     """
     Computes the loss and gradient for softmax classification.
-
     Inputs:
     - x: Input data, of shape (N, C) where x[i, j] is the score for the jth
       class for the ith input.
@@ -802,7 +834,22 @@ def softmax_loss(x, y):
     # TODO: Copy over your solution from A1.
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+    loss = 0.0
 
+    score=x
+    num_train=x.shape[0]
+    num_classes=x.shape[1]
+    #############################################################################
+    # TODO: ##########
+    # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+    score_exp=np.exp(score-np.max(score))
+    softmax_prob=score_exp/np.sum(score_exp,axis=1).reshape(-1,1)
+    # print(softmax_prob.shape,y.shape)
+    loss+= np.sum(-np.log(softmax_prob[np.arange(len(y)),y]))
+    loss/=num_train
+    dx=softmax_prob
+    dx[np.arange(len(y)),y]-=1
+    dx/=num_train
     pass
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****

@@ -54,7 +54,15 @@ class TwoLayerNet(object):
         # weights and biases using the keys 'W2' and 'b2'.                         #
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
+        W1=weight_scale*np.random.randn(input_dim,hidden_dim)
+        b1=np.zeros(hidden_dim)
+        self.params['W1']=W1
+        self.params['b1']=b1
+        W2=weight_scale*np.random.randn(hidden_dim,num_classes)
+        b2=np.zeros(num_classes)
+        self.params['W2']=W2
+        self.params['b2']=b2
+        
         pass
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
@@ -87,7 +95,17 @@ class TwoLayerNet(object):
         # class scores for X and storing them in the scores variable.              #
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
+        number=X.shape[0]
+        x= X.reshape(number,-1)
+        # print(x.shape)
+        # breakpoint
+        W1=self.params['W1']
+        b1=self.params['b1']
+        W2=self.params['W2']
+        b2=self.params['b2']
+        a1,cache1=affine_relu_forward(x,W1,b1)
+        a2=a1.dot(W2)+b2
+        scores=a2
         pass
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
@@ -111,9 +129,18 @@ class TwoLayerNet(object):
         # of 0.5 to simplify the expression for the gradient.                      #
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
+        loss,grad_score=softmax_loss(scores,y)
+        loss += 0.5*self.reg * (np.sum(W2 * W2) + np.sum( W1 * W1 ))
+        cache= a1, W2, b2 
+        da1,dW2,db2=affine_backward(grad_score,cache)
+        dW2=dW2+self.reg*W2
+        grads['W2']=dW2
+        grads['b2']=db2
+        dx,dW1,db1=affine_relu_backward(da1,cache1)
+        grads['W1']=dW1+self.reg*W1
+        grads['b1']=db1
         pass
-
+        
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
         ############################################################################
         #                             END OF YOUR CODE                             #
