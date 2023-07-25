@@ -63,7 +63,7 @@ class FullyConnectedNet(object):
         ############################################################################
         # TODO: Initialize the parameters of the network, storing all values in    #
         # the self.params dictionary. Store weights and biases for the first layer #
-        # in W1 and b1; for the second layer use W2 and b2, etc. Weights should be #
+        # in W1 and b1; for the second layer use Wf and bf, etc. Weights should be #
         # initialized from a normal distribution centered at 0 with standard       #
         # deviation equal to weight_scale. Biases should be initialized to zero.   #
         #                                                                          #
@@ -73,7 +73,23 @@ class FullyConnectedNet(object):
         # parameters should be initialized to zeros.                               #
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
+        prev=input_dim
+        for i,hidden_dim in enumerate(hidden_dims):
+            
+            W=weight_scale*np.random.randn(prev,hidden_dim)
+            b=np.zeros(hidden_dim)
+            n1='W'+(str)(i+1)
+            n2='b'+(str)(i+1)
+            self.params[n1]=W
+            self.params[n2]=b
+            prev=hidden_dim
+        
+        name1="W"+(str)(self.num_layers)
+        name2='b'+(str)(self.num_layers)
+        Wf=weight_scale*np.random.randn(prev,num_classes)
+        bf=np.zeros(num_classes)
+        self.params[name1]=Wf
+        self.params[name2]=bf
         pass
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
@@ -147,7 +163,24 @@ class FullyConnectedNet(object):
         # layer, etc.                                                              #
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
+        name1="W"+(str)(self.num_layers)
+        name2='b'+(str)(self.num_layers)
+        number=X.shape[0]
+        x= X.reshape(number,-1)
+        a=x
+        # breakpoint
+        cache=[]
+        for i in range(self.num_layers-1):
+            n1='W'+(str)(i+1)
+            n2='b'+(str)(i+1)
+            W=self.params[n1]
+            b=self.params[n2]
+            a,cache1=affine_relu_forward(a,W,b)
+            cache.append(cache1)
+        Wf=self.params[name1]
+        bf=self.params[name2]
+        a2=a.dot(Wf)+bf
+        scores=a2
         pass
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
@@ -174,7 +207,27 @@ class FullyConnectedNet(object):
         # of 0.5 to simplify the expression for the gradient.                      #
         ############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
+        loss,grad_score=softmax_loss(scores,y)
+        sum=np.sum(Wf*Wf)
+        for i in range(self.num_layers-1):
+            n1='W'+(str)(i+1)
+            W=self.params[n1]
+            sum=np.sum(W*W)
+                  
+        loss += 0.5*self.reg * sum
+        cache_2= a, Wf, bf 
+        da1,dWf,dbf=affine_backward(grad_score,cache_2)
+        dWf=dWf+self.reg*Wf
+        grads[name1]=dWf
+        grads[name2]=dbf
+        for i in reversed(range(self.num_layers-1)):
+            n1='W'+(str)(i+1)
+            n2='b'+(str)(i+1)
+            W=self.params[n1]
+            b=self.params[n2]
+            da1,dW1,db1=affine_relu_backward(da1,cache[i])
+            grads[n1]=dW1+self.reg* self.params[n1]
+            grads[n2]=db1
         pass
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****

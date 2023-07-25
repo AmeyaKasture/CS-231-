@@ -24,7 +24,10 @@ def affine_forward(x, w, b):
     # TODO: Copy over your solution from Assignment 1.                        #
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
+    number=x.shape[0]
+    X=x.reshape(number,-1)
+    out=X.dot(w)+b
+  
     pass
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
@@ -56,7 +59,13 @@ def affine_backward(dout, cache):
     # TODO: Copy over your solution from Assignment 1.                        #
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
+    db=np.sum(dout,axis=0)
+    og=x.shape
+    number=x.shape[0]
+    X=x.reshape(number,-1)
+    dw=(X.T).dot(dout)
+    dx=dout.dot(w.T)
+    dx=dx.reshape(og)
     pass
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
@@ -81,7 +90,7 @@ def relu_forward(x):
     # TODO: Copy over your solution from Assignment 1.                        #
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
+    out=np.maximum(x,0)
     pass
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
@@ -107,7 +116,10 @@ def relu_backward(dout, cache):
     # TODO: Copy over your solution from Assignment 1.                        #
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
+    x[x>0]=1
+    x[x<=0]=0
+    dx=dout
+    dx[x==0]=0
     pass
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
@@ -132,11 +144,22 @@ def softmax_loss(x, y):
     """
     loss, dx = None, None
 
-    ###########################################################################
-    # TODO: Copy over your solution from Assignment 1.                        #
-    ###########################################################################
-    # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+    loss = 0.0
 
+    score=x
+    num_train=x.shape[0]
+    num_classes=x.shape[1]
+    #############################################################################
+    # TODO: ##########
+    # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+    score_exp=np.exp(score-np.max(score))
+    softmax_prob=score_exp/np.sum(score_exp,axis=1).reshape(-1,1)
+    # print(softmax_prob.shape,y.shape)
+    loss+= np.sum(-np.log(softmax_prob[np.arange(len(y)),y]))
+    loss/=num_train
+    dx=softmax_prob
+    dx[np.arange(len(y)),y]-=1
+    dx/=num_train
     pass
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
