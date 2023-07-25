@@ -155,6 +155,7 @@ class Solver(object):
         # Set up some variables for book-keeping
         self.epoch = 0
         self.best_val_acc = 0
+        self.train_acc=0
         self.best_params = {}
         self.loss_history = []
         self.train_acc_history = []
@@ -301,6 +302,7 @@ class Solver(object):
                 # Keep track of the best model
                 if val_acc > self.best_val_acc:
                     self.best_val_acc = val_acc
+                    self.train_acc=train_acc
                     self.best_params = {}
                     for k, v in self.model.params.items():
                         self.best_params[k] = v.copy()

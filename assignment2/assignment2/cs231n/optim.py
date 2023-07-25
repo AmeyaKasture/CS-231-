@@ -61,14 +61,16 @@ def sgd_momentum(w, dw, config=None):
     config.setdefault("learning_rate", 1e-2)
     config.setdefault("momentum", 0.9)
     v = config.get("velocity", np.zeros_like(w))
-
+    mu=config["momentum"]
+    lr=config["learning_rate"]
     next_w = None
     ###########################################################################
     # TODO: Implement the momentum update formula. Store the updated value in #
     # the next_w variable. You should also use and update the velocity v.     #
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
+    v=mu*v-lr*dw
+    next_w=w+v
     pass
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
@@ -98,7 +100,10 @@ def rmsprop(w, dw, config=None):
     config.setdefault("decay_rate", 0.99)
     config.setdefault("epsilon", 1e-8)
     config.setdefault("cache", np.zeros_like(w))
-
+    lr=config["learning_rate"]
+    dr=config["decay_rate"]
+    ep=config["epsilon"]
+    cache=config["cache"]
     next_w = None
     ###########################################################################
     # TODO: Implement the RMSprop update formula, storing the next value of w #
@@ -106,14 +111,15 @@ def rmsprop(w, dw, config=None):
     # config['cache'].                                                        #
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
+    cache=dr*cache+(1-dr)*dw*dw
+    next_w=w-(dw*lr)/(np.sqrt(cache)+ep)
     pass
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
-
+    config["cache"]=cache
     return next_w, config
 
 
@@ -133,13 +139,13 @@ def adam(w, dw, config=None):
     """
     if config is None:
         config = {}
-    config.setdefault("learning_rate", 1e-3)
-    config.setdefault("beta1", 0.9)
-    config.setdefault("beta2", 0.999)
-    config.setdefault("epsilon", 1e-8)
-    config.setdefault("m", np.zeros_like(w))
-    config.setdefault("v", np.zeros_like(w))
-    config.setdefault("t", 0)
+    lr=config.setdefault("learning_rate",1e-3)
+    b1=config.setdefault("beta1", 0.9)
+    b2=config.setdefault("beta2", 0.999)
+    ep=config.setdefault("epsilon", 1e-8)
+    m=config.setdefault("m", np.zeros_like(w))
+    v=config.setdefault("v", np.zeros_like(w))
+    t=config.setdefault("t", 0)
 
     next_w = None
     ###########################################################################
@@ -151,12 +157,18 @@ def adam(w, dw, config=None):
     # using it in any calculations.                                           #
     ###########################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
+    t=t+1
+    m= b1*m+(1-b1)*dw
+    mt=m/(1-b1**t)
+    v= b2*v+(1-b2)*dw*dw
+    vt=v/(1-b2**t)
+    next_w=w-(lr*mt)/(np.sqrt(vt)+ep)
     pass
-
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
-
+    config["t"]=t
+    config["m"]=m
+    config["v"]=v
     return next_w, config
